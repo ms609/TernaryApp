@@ -1,3 +1,41 @@
 body {
   font-family: "Gill Sans", "Gill Sans MT", "Gill Sans MS", "Verdana", "Sans-Serif";
 }
+
+form.well {
+  padding-top: 0;
+}
+
+.nav-tabs {
+  border: 0;
+}
+
+.nav-tabs>li>a,
+.nav-tabs>li>a:focus,
+.nav-tabs>li>a:hover,
+.nav-tabs>li.active>a,
+.nav-tabs>li.active>a:focus,
+.nav-tabs>li.active>a:hover {
+  border-radius: 4px;
+  border: solid 1px #777777;
+  margin: 1px;
+}
+
+.nav-tabs>li.active>a {
+  background-color: #ffffff;
+}
+.nav-tabs>li>a:hover, .nav-tabs>li.active>a:hover {
+  background-color: #dddddd;
+}
+.nav-tabs>li.active>a:focus {
+  background-color: #cccccc;
+}
+
+div#caption {
+  margin-top: 2em;
+}
+
+div#dataStatus {
+  position: relative;
+  top: -15px;
+}

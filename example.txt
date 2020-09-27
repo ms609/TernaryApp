@@ -1,0 +1,5 @@
+Quartz,Feldspar,Rock fragments,Property 1
+101, 20, 70, 1
+301, 40, 50, 1
+221, 50, 28, 2
+231, 51, 26, 2

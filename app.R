@@ -52,11 +52,15 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
     sidebarPanel(
       tabsetPanel(
         tabPanel('Load data',
-           fileInput("datafile", "Data", placeholder = "No data file selected"),
+           tags$div("Upload a csv or spreadsheet, where the first three columns",
+                    "correspond to the position"),
+           fileInput("datafile", "Data", placeholder = "No data file selected",
+                     accept = c('.csv', '.txt', '.xls', '.xlsx')),
            textOutput(outputId = "dataStatus"),
            textInput('dim1', 'Column one', ''),
            textInput('dim2', 'Column two', ''),
            textInput('dim3', 'Column three', ''),
+           tags$p("Use the tabs above to edit display settings.")
            ),
         tabPanel('Plot display',
            
@@ -126,8 +130,30 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
   # Sidebar layout with input and output definitions ----
   
     mainPanel(
-      fluidRow(plotOutput(outputId = "plot")),
-      fluidRow(textOutput(outputId = "footer")),
+      tabsetPanel(
+        tabPanel('Plot',
+                 fluidRow(plotOutput(outputId = "plot")),
+        ),
+        tabPanel("R code",
+                 fluidRow(verbatimTextOutput('code')),
+        )
+      ),
+      withTags(
+        div(id = 'caption',
+          p("For additional features, see ",
+            a(href = "https://ms609.github.io/Ternary/articles/Ternary.html", "the R package"),
+            ", or",
+            a(href = "https://github.com/ms609/TernaryApp/issues/new?title=Missing+feature:+",
+             "request"),
+            " their addition to this app."),
+          p("If using figures in a publication, please cite Smith (2017). ",
+            "Ternary: An R Package for Creating Ternary Plots. ",
+            "Zenodo, doi:",
+            a(href = "https://dx.doi.org/10.5281/zenodo.1068996",
+              "10.5281/zenodo.1068996")
+          ),
+        )
+      ),
     )
   )
 
@@ -140,30 +166,32 @@ server <- function(input, output, session) {
   displaySetting <- function(id) id %in% input$display
   
   myData <- reactive({
-    fileInput <- input$treefile
+    fileInput <- input$datafile
+    message(attributes(fileInput))
     exampleFile <- system.file('inst', 'TernaryApp', 'example.csv', package = 'Ternary')
     if (is.null(fileInput)) {
       output$dataStatus <- renderText({"Data file not found; using example."})
-      tmpFile <- exampleFile
+      filePath <- exampleFile
     } else {
-      tmpFile <- fileInput$datapath
-      if (is.null(tmpFile)) {
+      filePath <- fileInput$datapath
+      if (is.null(filePath)) {
         output$dataStatus <- renderText({"Data file not found; using example."})
+        filePath <- exampleFile
+      } else {
+        output$dataStatus <- renderText({paste0("Loaded data from ", fileInput$name)})
       }
     }
     
-    ret <- read.csv(tmpFile)
-    
-    if (dim(ret)[2] < 3L) {
-      ret <- read.table(tmpFile)
-    }
-    if (dim(ret)[2] < 3L) {
-      ret <- xlsx::read.xlsx(tmpFile)
-    }
-    if (dim(ret)[2] < 3L) {
-      ret <- read.csv(exampleFile)
-      output$dataStatus <- renderText({"Could not parse data file; using example."})
-    }
+    extension <- substr(filePath, nchar(filePath) - 3, nchar(filePath))
+    message(filePath)
+    ret <- switch(extension,
+                  '.csv' = read.csv(filePath),
+                  '.txt' = read.table(filePath),
+                  '.xls' = readxl::read_excel(filePath),
+                  'xlsx' = readxl::read_excel(filePath),
+                  output$dataStatus <- renderText({
+                    paste0("Unsupported file extension: ", extension)})
+    )
     cn <- colnames(ret)
     updateTextInput(session, 'dim1', value = cn[1])
     updateTextInput(session, 'dim2', value = cn[2])
@@ -243,7 +271,59 @@ server <- function(input, output, session) {
     TernaryPoints(myData()[, 1:3])
     
   })
-  
+  output$code <- renderText({
+    paste0(
+    'TernaryPlot(
+  atip = "', tipLabels()[1], '",
+  btip = "', tipLabels()[2], '",
+  ctip = "', tipLabels()[3], '",
+  alab = "', axisLabels()[1], '",
+  blab = "', axisLabels()[2], '",
+  clab = "', axisLabels()[3], '",
+  lab.offset = ', input$lab.offset, ',
+  lab.col = ', input$lab.col, ',
+  point = ', input$point, ',
+  clockwise = ', displaySetting('clockwise'), ',
+  xlim = NULL,
+  ylim = NULL,
+  lab.cex = ', input$lab.cex, ',
+  lab.font = ', input$lab.font, ',
+  tip.cex = ', input$tip.cex, ',
+  tip.font = ', input$tip.font, ',
+  tip.col = ', input$tip.col, ',
+  isometric = ', displaySetting('isometric'), ',
+  atip.rotate = NULL,
+  btip.rotate = NULL,
+  ctip.rotate = NULL,
+  atip.pos = NULL,
+  btip.pos = NULL,
+  ctip.pos = NULL,
+  padding = 0.08,
+  col = NA,
+  grid.lines = ', input$grid.lines, ',
+  grid.col = ', input$grid.col, ',
+  grid.lty = ', input$grid.lty, ',
+  grid.lwd = ', input$grid.lwd, ',
+  grid.minor.lines = ', input$grid.minor.lines, ',
+  grid.minor.col = ', input$grid.minor.col, ',
+  grid.minor.lty = ', input$grid.minor.lty, ',
+  grid.minor.lwd = ', input$grid.minor.lwd, ',
+  axis.lty = ', input$axis.lty, ',
+  axis.labels = ', displaySetting('axis.labels'), ',
+  axis.cex = ', input$axis.cex, ',
+  axis.font = ', input$axis.font, ',
+  axis.rotate = ', displaySetting('axis.rotate'), ',
+  axis.tick = ', displaySetting('axis.tick'), ',
+  axis.lwd = ', input$axis.lwd, ',
+  ticks.lwd = ', input$ticks.lwd, ',
+  ticks.length = ', input$ticks.length, ',
+  axis.col = ', input$axis.col, ',
+  ticks.col = ', input$ticks.col, ',
+)
+TernaryPoints(myData[, 1:3])'
+    )
+  })
+
 }
 
 shinyApp(ui = ui, server = server)
