@@ -25,11 +25,12 @@ palettes <- list("#91aaa7",
                  c("#e7d6bb", "#749ed5", "#f9d29d", "#67b3e2", "#d09773", "#65ccec", "#d38585", "#7fe8ef", "#cf8190", "#94e8cd", "#ae8cc1", "#b3cf95", "#cbc0fc", "#94a66c", "#eeccff", "#ada368", "#e9a6ce", "#48a297", "#ffc1df", "#799c7a", "#facbe0", "#5d9e9a", "#ffc6c1", "#619bb0", "#fccdcb", "#7197bb", "#b1e4c3", "#9390b1", "#c3e0c0", "#a98c90", "#ade3ce", "#9c927d", "#c2dafe", "#869881", "#e6d3dc", "#6e9ba4", "#bde0d0", "#8196a4", "#b2e1df", "#b9deea")
 )
 
-ltyInput <- function (id, name, val) {
+ltyInput <- function (id, name, val, none = TRUE) {
   selectInput(id, paste(name, 'line type'),
-              list('None' = 'none', 'Solid' = 'solid', 'Dotted' = 'dotted',
+              c(if(none) list('None' = 'blank'),
+              list('Solid' = 'solid', 'Dotted' = 'dotted',
                    'Dashed' = 'dashed', 'Dot-Dash' = 'dotdash',
-                   'Long-dash' = 'longdash', 'Two-dash' = 'twodash'),
+                   'Long-dash' = 'longdash', 'Two-dash' = 'twodash')),
               val)
 }
 cexInput <- function (id, name, val) {
@@ -53,7 +54,8 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
       tabsetPanel(
         tabPanel('Load data',
            tags$div("Upload a csv or spreadsheet, where the first three columns",
-                    "correspond to the position"),
+                    "list the co-ordinates of each point.  Columns 4 to 6 may",
+                    "be used to specify the points' style."),
            fileInput("datafile", "Data", placeholder = "No data file selected",
                      accept = c('.csv', '.txt', '.xls', '.xlsx')),
            textOutput(outputId = "dataStatus"),
@@ -110,8 +112,6 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
            lwdInput('grid.minor.lwd', 'Secondary grid', par("lwd")),
            ),
         tabPanel('Axes',
-           
-           
            ltyInput('axis.lty', 'Axis line type', 'solid'),
            cexInput('axis.cex', 'Axis character size', 0.8),
            fontInput('axis.font', 'Axis', par("font")),
@@ -123,7 +123,19 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
            lwdInput('ticks.lwd', 'Axis ticks', 1),
            sliderInput('ticks.length', 'Axis tick length', 0, 0.1, 0.025),
            colourInput('ticks.col', 'Axis tick colour', "darkgrey"),
-         )
+         ),
+        tabPanel('Points',
+          cexInput('points.cex', 'Point size', 1),
+          selectInput('points.type', 'Plot type', 
+                      list('Points only' = 'p',
+                           'Lines' = 'l',
+                           'Connected points' = 'b',
+                           'Text' = 'text'),
+                      'p'),
+          lwdInput('points.lwd', 'Connecting', 1),
+          ltyInput('points.lty', 'Connecting', 'solid', FALSE),
+          colourInput('points.col', 'Colour', '#222222'),
+          )
       ),
     ),
 
@@ -167,7 +179,6 @@ server <- function(input, output, session) {
   
   myData <- reactive({
     fileInput <- input$datafile
-    message(attributes(fileInput))
     exampleFile <- system.file('inst', 'TernaryApp', 'example.csv', package = 'Ternary')
     if (is.null(fileInput)) {
       output$dataStatus <- renderText({"Data file not found; using example."})
@@ -183,7 +194,6 @@ server <- function(input, output, session) {
     }
     
     extension <- substr(filePath, nchar(filePath) - 3, nchar(filePath))
-    message(filePath)
     ret <- switch(extension,
                   '.csv' = read.csv(filePath),
                   '.txt' = read.table(filePath),
@@ -268,7 +278,19 @@ server <- function(input, output, session) {
       axis.col = input$axis.col,
       ticks.col = input$ticks.col
     )
-    TernaryPoints(myData()[, 1:3])
+    if (input$points.type == 'text') {
+      TernaryText(myData()[, 1:3],
+                  cex = input$points.cex
+      )
+    } else {
+      message(input$type)
+      TernaryPoints(myData()[, 1:3],
+                    cex = input$points.cex,
+                    lwd = input$points.lwd,
+                    lty = input$points.lty,
+                    col = input$points.col,
+                    type = input$points.type)
+    }
     
   })
   output$code <- renderText({
