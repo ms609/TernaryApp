@@ -46,7 +46,7 @@ fontInput <- function (id, name, val) {
 
 
 # Define UI for app that draws a histogram ----
-ui <- fluidPage(title = 'Ternary plotter',
+ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
 
   sidebarLayout(
     sidebarPanel(
