@@ -33,6 +33,31 @@ ltyInput <- function (id, name, val, none = TRUE) {
                    'Long-dash' = 'longdash', 'Two-dash' = 'twodash')),
               val)
 }
+pchInput <- function (id, name, val) {
+  selectInput(id, name, 
+              list('Square' = 0,
+                   'Circle' = 1,
+                   'Triangle-up' = 2,
+                   'Plus' = 3,
+                   'Cross' = 4,
+                   'Diamond' = 5,
+                   'Triangle-down' = 6,
+                   'Crossed-square' = 7,
+                   'Star' = 8,
+                   'Plussed-diamond' = 9,
+                   'Plussed-circle' = 10,
+                   'Snowflake' = 11,
+                   'Plussed-square' = 12,
+                   'Crossed-circle' = 13,
+                   'Triangle-in-square' = 14,
+                   'Filled square' = 15,
+                   'Filled circle' = 16,
+                   'Filled triangle' = 17,
+                   'Filled diamond' = 18
+                   
+                   ),
+              val)
+}
 cexInput <- function (id, name, val) {
   sliderInput(id, name, 0, 4, val, step = 0.01)
 }
@@ -68,6 +93,7 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
            
            sliderInput('lab.offset', 'Label offset', -0.3, 0.5, 0.16, step = 0.005),
            colourInput('lab.col', 'Label colour', 'black'),
+           colourInput('col', 'Background colour', '#ffffff'),
            selectInput('point', 'Plot direction', 
                        list('Up' = 'up', 'Right' = 'right', 'Down' = 'down',
                             'Left' = 'left'), 'up'),
@@ -125,13 +151,14 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
            colourInput('ticks.col', 'Axis tick colour', "darkgrey"),
          ),
         tabPanel('Points',
-          cexInput('points.cex', 'Point size', 1),
           selectInput('points.type', 'Plot type', 
                       list('Points only' = 'p',
                            'Lines' = 'l',
                            'Connected points' = 'b',
                            'Text' = 'text'),
                       'p'),
+          pchInput('points.pch', 'Point shape', 1),
+          cexInput('points.cex', 'Point size', 1),
           lwdInput('points.lwd', 'Connecting', 1),
           ltyInput('points.lty', 'Connecting', 'solid', FALSE),
           colourInput('points.col', 'Colour', '#222222'),
@@ -175,32 +202,44 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
 
 server <- function(input, output, session) {
   
+  r <- reactiveValues()
   displaySetting <- function(id) id %in% input$display
   
-  myData <- reactive({
+  filePath <- reactive({
     fileInput <- input$datafile
     exampleFile <- system.file('inst', 'TernaryApp', 'example.csv', package = 'Ternary')
     if (is.null(fileInput)) {
       output$dataStatus <- renderText({"Data file not found; using example."})
-      filePath <- exampleFile
+      candidate <- exampleFile
     } else {
-      filePath <- fileInput$datapath
-      if (is.null(filePath)) {
+      candidate <- fileInput$datapath
+      if (is.null(candidate)) {
         output$dataStatus <- renderText({"Data file not found; using example."})
-        filePath <- exampleFile
+        candidate <- exampleFile
       } else {
+        r$fileName <- fileInput$name
         output$dataStatus <- renderText({paste0("Loaded data from ", fileInput$name)})
       }
     }
     
-    extension <- substr(filePath, nchar(filePath) - 3, nchar(filePath))
-    ret <- switch(extension,
-                  '.csv' = read.csv(filePath),
-                  '.txt' = read.table(filePath),
-                  '.xls' = readxl::read_excel(filePath),
-                  'xlsx' = readxl::read_excel(filePath),
+    # Return:
+    candidate
+  })
+  
+  fileExt <- reactive({
+    fp <- filePath()
+    extension <- substr(fp, nchar(fp) - 3, nchar(fp))
+  })
+  
+  myData <- reactive({
+    fp <- filePath()
+    ret <- switch(fileExt(),
+                  '.csv' = read.csv(fp),
+                  '.txt' = read.table(fp),
+                  '.xls' = readxl::read_excel(fp),
+                  'xlsx' = readxl::read_excel(fp),
                   output$dataStatus <- renderText({
-                    paste0("Unsupported file extension: ", extension)})
+                    paste0("Unsupported file extension: ", fileExt())})
     )
     cn <- colnames(ret)
     updateTextInput(session, 'dim1', value = cn[1])
@@ -229,6 +268,7 @@ server <- function(input, output, session) {
   })
   
   output$plot <- renderPlot({
+    
     par(mar = rep(0, 4))
     TernaryPlot(
       atip = tipLabels()[1],
@@ -256,7 +296,7 @@ server <- function(input, output, session) {
       btip.pos = NULL,
       ctip.pos = NULL,
       padding = 0.08,
-      col = NA,
+      col = input$col,
       grid.lines = input$grid.lines,
       grid.col = input$grid.col,
       grid.lty = input$grid.lty,
@@ -280,12 +320,15 @@ server <- function(input, output, session) {
     )
     if (input$points.type == 'text') {
       TernaryText(myData()[, 1:3],
-                  cex = input$points.cex
+                  cex = input$points.cex,
+                  pch = as.numeric(input$points.pch),
+                  col = input$points.col
       )
     } else {
       message(input$type)
       TernaryPoints(myData()[, 1:3],
                     cex = input$points.cex,
+                    pch = as.numeric(input$points.pch),
                     lwd = input$points.lwd,
                     lty = input$points.lty,
                     col = input$points.col,
@@ -303,8 +346,8 @@ server <- function(input, output, session) {
   blab = "', axisLabels()[2], '",
   clab = "', axisLabels()[3], '",
   lab.offset = ', input$lab.offset, ',
-  lab.col = ', input$lab.col, ',
-  point = ', input$point, ',
+  lab.col = "', input$lab.col, '",
+  point = "', input$point, '",
   clockwise = ', displaySetting('clockwise'), ',
   xlim = NULL,
   ylim = NULL,
@@ -312,7 +355,7 @@ server <- function(input, output, session) {
   lab.font = ', input$lab.font, ',
   tip.cex = ', input$tip.cex, ',
   tip.font = ', input$tip.font, ',
-  tip.col = ', input$tip.col, ',
+  tip.col = "', input$tip.col, '",
   isometric = ', displaySetting('isometric'), ',
   atip.rotate = NULL,
   btip.rotate = NULL,
@@ -321,16 +364,16 @@ server <- function(input, output, session) {
   btip.pos = NULL,
   ctip.pos = NULL,
   padding = 0.08,
-  col = NA,
+  col = "', input$col, '",
   grid.lines = ', input$grid.lines, ',
-  grid.col = ', input$grid.col, ',
-  grid.lty = ', input$grid.lty, ',
+  grid.col = "', input$grid.col, '",
+  grid.lty = "', input$grid.lty, '",
   grid.lwd = ', input$grid.lwd, ',
   grid.minor.lines = ', input$grid.minor.lines, ',
-  grid.minor.col = ', input$grid.minor.col, ',
-  grid.minor.lty = ', input$grid.minor.lty, ',
+  grid.minor.col = "', input$grid.minor.col, '",
+  grid.minor.lty = "', input$grid.minor.lty, '",
   grid.minor.lwd = ', input$grid.minor.lwd, ',
-  axis.lty = ', input$axis.lty, ',
+  axis.lty = "', input$axis.lty, '",
   axis.labels = ', displaySetting('axis.labels'), ',
   axis.cex = ', input$axis.cex, ',
   axis.font = ', input$axis.font, ',
@@ -339,13 +382,32 @@ server <- function(input, output, session) {
   axis.lwd = ', input$axis.lwd, ',
   ticks.lwd = ', input$ticks.lwd, ',
   ticks.length = ', input$ticks.length, ',
-  axis.col = ', input$axis.col, ',
-  ticks.col = ', input$ticks.col, ',
+  axis.col = "', input$axis.col, '",
+  ticks.col = "', input$ticks.col, '"
+)\n\n',
+    '# Include the full path to your data file here if necessary:\n',
+    'myData <- ', switch(fileExt(), '.csv' = 'read.csv',
+                         '.txt' = 'read.table',
+                         '.xls' = 'readxl::read_excel',
+                         'xlsx' = 'readxl::read_excel', 'read.csv'), 
+    '("', r$fileName, '")\n\n',
+if (input$points.type == 'text') {
+  paste0(
+      'TernaryText(myData[, 1:3],
+  cex = ', input$points.cex, ',
+  pch = ', input$points.pch, '
+  col = "', input$points.col, '"\n)')
+    } else {
+      paste0('TernaryPoints(myData[, 1:3],
+  type = "', input$points.type, '",
+  cex = ', input$points.cex, ',
+  pch = ', input$points.pch, ',
+  lwd = ', input$points.lwd, ',
+  lty = "', input$points.lty, '",
+  col = "', input$points.col, '"\n)')
+    }
 )
-TernaryPoints(myData[, 1:3])'
-    )
   })
-
 }
 
 shinyApp(ui = ui, server = server)

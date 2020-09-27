@@ -31,8 +31,22 @@ form.well {
   background-color: #cccccc;
 }
 
+.colourpicker-input-container {
+  width: 6em;
+  display: inline-block;
+  margin-left: 1.8em;
+}
+
+.palette-square {
+  display: inline-block;
+}
+
 div#caption {
   margin-top: 2em;
+}
+
+pre#code {
+  margin: 3px;
 }
 
 div#dataStatus {
