@@ -172,6 +172,16 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
       tabsetPanel(
         tabPanel('Plot',
                  fluidRow(plotOutput(outputId = "plot")),
+                 fluidRow(id = 'saveButtons',
+                   tags$span("Save as: "),
+                   downloadButton('saveR', 'R script'),
+                   downloadButton('savePdf', 'PDF'),
+                   downloadButton('savePng', 'PNG'),
+                   tags$span("PNG size: ", id = 'pngSizeLabel'),
+                   numericInput('pngSize', NULL, 800, 100,
+                               width = "70px", step = 10),
+                   tags$span("pixels"),
+                 ),
         ),
         tabPanel("R code",
                  fluidRow(verbatimTextOutput('code')),
@@ -267,7 +277,7 @@ server <- function(input, output, session) {
     } else rep(NULL, 3)
   })
   
-  output$plot <- renderPlot({
+  makePlot <- function () {
     
     par(mar = rep(0, 4))
     TernaryPlot(
@@ -335,10 +345,18 @@ server <- function(input, output, session) {
                     type = input$points.type)
     }
     
-  })
-  output$code <- renderText({
+  }
+  
+  rScript <- function() {
     paste0(
-    'TernaryPlot(
+      '# Include the full path to your data file here if necessary:\n',
+      'myData <- ', switch(fileExt(), '.csv' = 'read.csv',
+                           '.txt' = 'read.table',
+                           '.xls' = 'readxl::read_excel',
+                           'xlsx' = 'readxl::read_excel', 'read.csv'), 
+      '("', r$fileName, '")\n\n',
+      
+      'TernaryPlot(
   atip = "', tipLabels()[1], '",
   btip = "', tipLabels()[2], '",
   ctip = "', tipLabels()[3], '",
@@ -385,29 +403,49 @@ server <- function(input, output, session) {
   axis.col = "', input$axis.col, '",
   ticks.col = "', input$ticks.col, '"
 )\n\n',
-    '# Include the full path to your data file here if necessary:\n',
-    'myData <- ', switch(fileExt(), '.csv' = 'read.csv',
-                         '.txt' = 'read.table',
-                         '.xls' = 'readxl::read_excel',
-                         'xlsx' = 'readxl::read_excel', 'read.csv'), 
-    '("', r$fileName, '")\n\n',
-if (input$points.type == 'text') {
-  paste0(
-      'TernaryText(myData[, 1:3],
+      
+      if (input$points.type == 'text') {
+        paste0(
+          'TernaryText(myData[, 1:3],
   cex = ', input$points.cex, ',
   pch = ', input$points.pch, '
   col = "', input$points.col, '"\n)')
-    } else {
-      paste0('TernaryPoints(myData[, 1:3],
+      } else {
+        paste0('TernaryPoints(myData[, 1:3],
   type = "', input$points.type, '",
   cex = ', input$points.cex, ',
   pch = ', input$points.pch, ',
   lwd = ', input$points.lwd, ',
   lty = "', input$points.lty, '",
   col = "', input$points.col, '"\n)')
-    }
-)
-  })
+      }
+    )
+  }
+  
+  output$plot <- renderPlot(makePlot())
+  output$code <- renderText(rScript())
+  output$savePng <- downloadHandler(
+    filename = 'TernaryPlot.png',
+    content = function (file) {
+      png(file, width = input$pngSize, height = input$pngSize)
+      makePlot()
+      dev.off()
+    })
+  output$savePdf <- downloadHandler(
+    filename = 'TernaryPlot.pdf',
+    content = function (file) {
+      pdf(file, 
+          title = paste0('Ternary plot', 
+                         if(filePath() != '') paste0('  from ', filePath())))
+      makePlot()
+      dev.off()
+    })
+  output$saveR <- downloadHandler(
+    filename = 'TernaryPlot.R',
+    content = function (file) {
+      writeLines(rScript(), file)
+    })
+        
 }
 
 shinyApp(ui = ui, server = server)

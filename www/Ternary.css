@@ -53,3 +53,13 @@ div#dataStatus {
   position: relative;
   top: -15px;
 }
+
+div#saveButtons {
+  margin-top: 8px;
+}
+
+#pngSizeLabel + div {
+  display: inline-block;
+  width: 80px;
+  text-align: right;
+}
