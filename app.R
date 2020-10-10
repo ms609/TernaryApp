@@ -248,8 +248,11 @@ server <- function(input, output, session) {
                   '.txt' = read.table(fp),
                   '.xls' = readxl::read_excel(fp),
                   'xlsx' = readxl::read_excel(fp),
-                  output$dataStatus <- renderText({
-                    paste0("Unsupported file extension: ", fileExt())})
+                  {
+                    output$dataStatus <- renderText({
+                      paste0("Unsupported file extension: ", fileExt())})
+                    matrix(0, 0, 3)
+                  }
     )
     cn <- colnames(ret)
     updateTextInput(session, 'dim1', value = cn[1])
@@ -336,13 +339,16 @@ server <- function(input, output, session) {
       )
     } else {
       message(input$type)
-      TernaryPoints(myData()[, 1:3],
-                    cex = input$points.cex,
-                    pch = as.numeric(input$points.pch),
-                    lwd = input$points.lwd,
-                    lty = input$points.lty,
-                    col = input$points.col,
-                    type = input$points.type)
+      if (dim(myData())[1] > 0) {
+          
+        TernaryPoints(myData()[, 1:3],
+                      cex = input$points.cex,
+                      pch = as.numeric(input$points.pch),
+                      lwd = input$points.lwd,
+                      lty = input$points.lty,
+                      col = input$points.col,
+                      type = input$points.type)
+      }
     }
     
   }
