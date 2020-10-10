@@ -238,7 +238,7 @@ server <- function(input, output, session) {
   
   fileExt <- reactive({
     fp <- filePath()
-    extension <- substr(fp, nchar(fp) - 3, nchar(fp))
+    if (nchar(fp) < 2) "<none>" else substr(fp, nchar(fp) - 3, nchar(fp))
   })
   
   myData <- reactive({
