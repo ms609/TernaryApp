@@ -1,4 +1,5 @@
 library("shiny")
+if(!requireNamespace('colourpicker', quietly = TRUE)) install.packages('colourpicker')
 library("colourpicker")
 library("Ternary")
 
