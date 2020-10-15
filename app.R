@@ -218,7 +218,7 @@ server <- function(input, output, session) {
   
   filePath <- reactive({
     fileInput <- input$datafile
-    exampleFile <- system.file('inst', 'TernaryApp', 'example.csv', package = 'Ternary')
+    exampleFile <- system.file('TernaryApp', 'example.csv', package = 'Ternary')
     if (is.null(fileInput)) {
       output$dataStatus <- renderText({"Data file not found; using example."})
       candidate <- exampleFile
