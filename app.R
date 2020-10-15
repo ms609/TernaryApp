@@ -59,7 +59,6 @@ pchInput <- function (id, name, val) {
                 'Filled circle' = 16,
                 'Filled triangle' = 17,
                 'Filled diamond' = 18
-                
                 ),
               val)
 }
@@ -163,6 +162,12 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
                            'Connected points' = 'b',
                            'Text' = 'text'),
                       'p'),
+          selectInput('text.source', 'Text to display',
+                      list('Row names' = 0,
+                           'Data column 4' = 4,
+                           'Data column 5' = 5,
+                           'Data column 6' = 6),
+                      0),
           pchInput('points.pch', 'Point shape', 16),
           selectInput('points.col.by', 'Point colour',
                       list('Data column 4' = 4,
@@ -322,6 +327,44 @@ server <- function(input, output, session) {
             '5' = 'myData[, 5]',
             '6' = 'myData[, 6]')
   }
+  TextLabels <- function () {
+    switch(input$text.source, 
+           '0' = if (is.null(rownames(myData()))) seq_len(nrow(myData())) else
+             rownames(myData()),
+           '4' = DataCol(4),
+           '5' = DataCol(5),
+           '6' = DataCol(6))
+  }
+  TextLabelsText <- function () {
+    switch (input$text.source, 
+            '0' = if (is.null(rownames(myData()))) {
+              "seq_len(nrow(myData))"
+            } else {
+              "rownames(myData)"
+            },
+            '4' = 'myData[, 4]',
+            '5' = 'myData[, 5]',
+            '6' = 'myData[, 6]')
+  }
+  observeEvent(input$points.type, {
+    if (input$points.type == 'text') {
+      showElement('text.source')
+    } else {
+      hideElement('text.source')
+    }
+    if (input$points.type %in% c('p', 'b')) {
+      showElement('points.pch')
+    } else {
+      hideElement('points.pch')
+    }
+    if (input$points.type %in% c('l', 'b')) {
+      showElement('points.lwd')
+      showElement('points.lty')
+    } else {
+      hideElement('points.lwd')
+      hideElement('points.lty')
+    }
+  })
   observeEvent(input$points.col.by, {
     if (input$points.col.by == '0') {
       showElement('points.col') 
@@ -409,6 +452,7 @@ server <- function(input, output, session) {
     )
     if (input$points.type == 'text') {
       TernaryText(myData()[, 1:3],
+                  labels = TextLabels(),
                   cex = input$points.cex,
                   pch = PchValue(input$points.pch),
                   col = PtCol()
@@ -488,8 +532,9 @@ server <- function(input, output, session) {
       if (input$points.type == 'text') {
         paste0(
           'TernaryText(myData[, 1:3],
+  labels = ', TextLabelsText(), '
   cex = ', input$points.cex, ',
-  pch = ', PchText(input$points.pch), '
+  pch = ', PchText(input$points.pch), ',
   col = "', input$points.col, '"\n)')
       } else {
         paste0('TernaryPoints(myData[, 1:3],
