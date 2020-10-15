@@ -532,7 +532,7 @@ server <- function(input, output, session) {
       if (input$points.type == 'text') {
         paste0(
           'TernaryText(myData[, 1:3],
-  labels = ', TextLabelsText(), '
+  labels = ', TextLabelsText(), ',
   cex = ', input$points.cex, ',
   pch = ', PchText(input$points.pch), ',
   col = "', input$points.col, '"\n)')
