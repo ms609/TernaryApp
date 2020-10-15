@@ -1,5 +1,5 @@
 library("shiny")
-if(!requireNamespace('colourpicker', quietly = TRUE)) install.packages('colourpicker')
+library("shinyjs", exclude = c('colourInput', 'colourPicker', 'runExample'))
 library("colourpicker")
 library("Ternary")
 
@@ -36,27 +36,31 @@ ltyInput <- function (id, name, val, none = TRUE) {
 }
 pchInput <- function (id, name, val) {
   selectInput(id, name, 
-              list('Square' = 0,
-                   'Circle' = 1,
-                   'Triangle-up' = 2,
-                   'Plus' = 3,
-                   'Cross' = 4,
-                   'Diamond' = 5,
-                   'Triangle-down' = 6,
-                   'Crossed-square' = 7,
-                   'Star' = 8,
-                   'Plussed-diamond' = 9,
-                   'Plussed-circle' = 10,
-                   'Snowflake' = 11,
-                   'Plussed-square' = 12,
-                   'Crossed-circle' = 13,
-                   'Triangle-in-square' = 14,
-                   'Filled square' = 15,
-                   'Filled circle' = 16,
-                   'Filled triangle' = 17,
-                   'Filled diamond' = 18
-                   
-                   ),
+              list(
+                'Data column 4' = 904,
+                'Data column 5' = 905,
+                'Data column 6' = 906,
+                'Square' = 0,
+                'Circle' = 1,
+                'Triangle-up' = 2,
+                'Plus' = 3,
+                'Cross' = 4,
+                'Diamond' = 5,
+                'Triangle-down' = 6,
+                'Crossed-square' = 7,
+                'Star' = 8,
+                'Plussed-diamond' = 9,
+                'Plussed-circle' = 10,
+                'Snowflake' = 11,
+                'Plussed-square' = 12,
+                'Crossed-circle' = 13,
+                'Triangle-in-square' = 14,
+                'Filled square' = 15,
+                'Filled circle' = 16,
+                'Filled triangle' = 17,
+                'Filled diamond' = 18
+                
+                ),
               val)
 }
 cexInput <- function (id, name, val) {
@@ -74,7 +78,8 @@ fontInput <- function (id, name, val) {
 
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
-
+  useShinyjs(),
+                
   sidebarLayout(
     sidebarPanel(
       tabsetPanel(
@@ -92,12 +97,10 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
            ),
         tabPanel('Plot display',
            
-           sliderInput('lab.offset', 'Label offset', -0.3, 0.5, 0.16, step = 0.005),
-           colourInput('lab.col', 'Label colour', 'black'),
-           colourInput('col', 'Background colour', '#ffffff'),
            selectInput('point', 'Plot direction', 
                        list('Up' = 'up', 'Right' = 'right', 'Down' = 'down',
                             'Left' = 'left'), 'up'),
+           colourInput('col', 'Background colour', '#ffffff'),
            checkboxGroupInput('display', 'Display options', 
                               list('Clockwise' = 'clockwise',
                                    'Isometric' = 'isometric',
@@ -108,7 +111,15 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
                                    'Rotate tick labels' = 'axis.rotate'), 
                               c('clockwise', 'isometric', 'axis.labels',
                                 'show.axis.labels', 'axis.tick', 'axis.rotate')),
-          
+           lwdInput('axis.lwd', 'Axis', 1),
+           ltyInput('axis.lty', 'Axis', 'solid'),
+           colourInput('axis.col', 'Axis colour', "black"),
+           lwdInput('ticks.lwd', 'Axis ticks', 1),
+           sliderInput('ticks.length', 'Axis tick length', 0, 0.1, 0.025),
+           colourInput('ticks.col', 'Axis tick colour', "darkgrey"),
+           
+           #axis.pos = NULL,
+           
           #xlim = NULL,
           #ylim = NULL,
           
@@ -120,13 +131,6 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
           #ctip.pos = NULL,
           #padding = 0.08,
           #col = NA,
-          cexInput('lab.cex', 'Label size', 1),
-          fontInput('lab.font', 'Label', 1),
-          
-          cexInput('tip.cex', 'Tip label size', 1),
-          fontInput('tip.font', 'Tip' , 1),
-          
-          colourInput('tip.col', 'Tip colour', 'black'),
           ),
         tabPanel('Grids',
            sliderInput('grid.lines' , 'Main grid lines', 1, 42, 10),
@@ -138,18 +142,19 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
            lwdInput('grid.lwd', 'Grid', par("lwd")),
            lwdInput('grid.minor.lwd', 'Secondary grid', par("lwd")),
            ),
-        tabPanel('Axes',
-           ltyInput('axis.lty', 'Axis line type', 'solid'),
-           cexInput('axis.cex', 'Axis character size', 0.8),
-           fontInput('axis.font', 'Axis', par("font")),
-           lwdInput('axis.lwd', 'Axis', 1),
-           colourInput('axis.col', 'Axis colour', "black"),
+        tabPanel('Labels',
+           cexInput('lab.cex', 'Axis label size', 1),
+           fontInput('lab.font', 'Axis label', 1),
+           sliderInput('lab.offset', 'Axis label offset', -0.3, 0.5, 0.16, step = 0.005),
+           colourInput('lab.col', 'Axis label colour', 'black'),
            
-           #axis.pos = NULL,
+           cexInput('axis.cex', 'Tick label size', 0.8),
+           fontInput('axis.font', 'Tick', par("font")),
            
-           lwdInput('ticks.lwd', 'Axis ticks', 1),
-           sliderInput('ticks.length', 'Axis tick length', 0, 0.1, 0.025),
-           colourInput('ticks.col', 'Axis tick colour', "darkgrey"),
+           
+           cexInput('tip.cex', 'Tip label size', 1),
+           fontInput('tip.font', 'Tip' , 1),
+           colourInput('tip.col', 'Tip colour', 'black'),
          ),
         tabPanel('Points',
           selectInput('points.type', 'Plot type', 
@@ -158,11 +163,17 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
                            'Connected points' = 'b',
                            'Text' = 'text'),
                       'p'),
-          pchInput('points.pch', 'Point shape', 1),
-          cexInput('points.cex', 'Point size', 1),
+          pchInput('points.pch', 'Point shape', 16),
+          selectInput('points.col.by', 'Point colour',
+                      list('Data column 4' = 4,
+                           'Data column 5' = 5,
+                           'Data column 6' = 6,
+                           'User-specified' = 0),
+                      0),
+          colourInput('points.col', 'Colour', '#222222'),
+          cexInput('points.cex', 'Point size', 1.8),
           lwdInput('points.lwd', 'Connecting', 1),
           ltyInput('points.lty', 'Connecting', 'solid', FALSE),
-          colourInput('points.col', 'Colour', '#222222'),
           )
       ),
     ),
@@ -220,7 +231,9 @@ server <- function(input, output, session) {
     fileInput <- input$datafile
     exampleFile <- system.file('TernaryApp', 'example.csv', package = 'Ternary')
     if (is.null(fileInput)) {
-      output$dataStatus <- renderText({"Data file not found; using example."})
+      output$dataStatus <- renderText(paste(
+        "Data file not found; using example from",
+        system.file('TernaryApp', 'example.csv', package = 'Ternary')))
       candidate <- exampleFile
     } else {
       candidate <- fileInput$datapath
@@ -281,6 +294,68 @@ server <- function(input, output, session) {
     } else rep(NULL, 3)
   })
   
+  PchValue <- function (pch) {
+    nPch <- as.numeric(pch)
+    if (nPch < 900L) nPch else as.numeric(myData()[, nPch - 900L])
+  }
+  PchText <- function (pch) {
+    nPch <- as.numeric(pch)
+    if (nPch < 900L) pch else paste0("myData[, ", nPch - 900L, "]")
+  }
+  DataCol <- function (i) {
+    if(ncol(myData()) >= i) myData()[, i] else {
+      message("Data only has ", ncol(myData()), " columns.")
+      0
+    }
+  }
+  PtCol <- function () {
+    switch (input$points.col.by,
+            '0' = input$points.col,
+            '4' = DataCol(4),
+            '5' = DataCol(5),
+            '6' = DataCol(6))
+  }
+  PtColTxt <- function () {
+    switch (input$points.col.by,
+            '0' = paste0('"', input$points.col, '"'),
+            '4' = 'myData[, 4]',
+            '5' = 'myData[, 5]',
+            '6' = 'myData[, 6]')
+  }
+  observeEvent(input$points.col.by, {
+    if (input$points.col.by == '0') {
+      showElement('points.col') 
+    } else {
+      hideElement('points.col')
+    }
+  })
+  observeEvent(input$display, ignoreNULL = FALSE, {
+    tipLabelSetting <- if ('show.tip.labels' %in% input$display) {
+      showElement
+    } else {
+      hideElement
+    }
+    tipLabelSetting('tip.cex')
+    tipLabelSetting('tip.font')
+    tipLabelSetting('tip.col')
+    axisLabelSetting <- if ('show.axis.labels' %in% input$display) {
+      showElement
+    } else {
+      hideElement
+    }
+    axisLabelSetting('lab.cex')
+    axisLabelSetting('lab.font')
+    axisLabelSetting('lab.offset')
+    
+    tickLabelSetting <- if ('axis.labels' %in% input$display) {
+      showElement
+    } else {
+      hideElement
+    }
+    tickLabelSetting('axis.cex')
+    tickLabelSetting('axis.font')
+  })
+  
   makePlot <- function () {
     
     par(mar = rep(0, 4))
@@ -335,19 +410,18 @@ server <- function(input, output, session) {
     if (input$points.type == 'text') {
       TernaryText(myData()[, 1:3],
                   cex = input$points.cex,
-                  pch = as.numeric(input$points.pch),
-                  col = input$points.col
+                  pch = PchValue(input$points.pch),
+                  col = PtCol()
       )
     } else {
-      message(input$type)
       if (dim(myData())[1] > 0) {
           
         TernaryPoints(myData()[, 1:3],
                       cex = input$points.cex,
-                      pch = as.numeric(input$points.pch),
+                      pch = PchValue(input$points.pch),
                       lwd = input$points.lwd,
                       lty = input$points.lty,
-                      col = input$points.col,
+                      col = PtCol(),
                       type = input$points.type)
       }
     }
@@ -415,16 +489,16 @@ server <- function(input, output, session) {
         paste0(
           'TernaryText(myData[, 1:3],
   cex = ', input$points.cex, ',
-  pch = ', input$points.pch, '
+  pch = ', PchText(input$points.pch), '
   col = "', input$points.col, '"\n)')
       } else {
         paste0('TernaryPoints(myData[, 1:3],
   type = "', input$points.type, '",
   cex = ', input$points.cex, ',
-  pch = ', input$points.pch, ',
+  pch = ', PchText(input$points.pch), ',
   lwd = ', input$points.lwd, ',
   lty = "', input$points.lty, '",
-  col = "', input$points.col, '"\n)')
+  col = ', PtColTxt(), '\n)')
       }
     )
   }
