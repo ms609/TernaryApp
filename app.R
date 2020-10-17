@@ -1,6 +1,9 @@
 library("shiny")
+if (!requireNamespace('shinyjs', quietly = TRUE)) install.packages('shinyjs')
 library("shinyjs", exclude = c('colourInput', 'colourPicker', 'runExample'))
+if (!requireNamespace('colourpicker', quietly = TRUE)) install.packages('colourpicker')
 library("colourpicker")
+if (!requireNamespace('Ternary', quietly = TRUE)) install.packages('Ternary')
 library("Ternary")
 
 palettes <- list("#91aaa7",
