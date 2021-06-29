@@ -4,17 +4,19 @@ if (!requireNamespace('shinyjs', quietly = TRUE,
                                   'colourPicker', 'runExample'))) {
   install.packages('shinyjs')
   install.packages('colourpicker') # Must be absent, as imports shinyjs
-  library("shinyjs", exclude = c('colourInput', 'colourPicker',
-                                 'updateColourInput', 'runExample'))
 }
+library("shinyjs", exclude = c('colourInput', 'colourPicker',
+                               'updateColourInput', 'runExample'))
+
 if (!requireNamespace('colourpicker', quietly = TRUE)) {
   install.packages('colourpicker')
-  library("colourpicker")
 }
+library("colourpicker")
+
 if (!requireNamespace('Ternary', quietly = TRUE)) {
   install.packages('Ternary')
-  library("Ternary")
 }
+library("Ternary")
 
 palettes <- list("#91aaa7",
                  c("#969660", "#c3dfca"),
