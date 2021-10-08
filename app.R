@@ -228,7 +228,7 @@ ui <- fluidPage(title = 'Ternary plotter', theme = "Ternary.css",
              "request"),
             " their addition to this app."),
           p("If using figures in a publication, please cite Smith (2017). ",
-            'Ternary: An R Package for Creating Ternary Plots." ',
+            '"Ternary: An R Package for Creating Ternary Plots." ',
             "Comprehensive R Archive Network, doi:",
             a(href = "https://dx.doi.org/10.5281/zenodo.1068996",
               "10.5281/zenodo.1068996")
