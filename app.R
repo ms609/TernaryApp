@@ -3,7 +3,7 @@ if (!requireNamespace('shinyjs', quietly = TRUE,
                       exclude = c('colourInput', 'updateColourInput',
                                   'colourPicker', 'runExample'))) {
   install.packages('shinyjs')
-  install.packages('colourpicker') # Must be absent, as imports shinyjs
+  install.packages('colourpicker') # Necessarily absent, as imports shinyjs
 }
 library("shinyjs", exclude = c('colourInput', 'colourPicker',
                                'updateColourInput', 'runExample'))
