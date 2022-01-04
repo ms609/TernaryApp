@@ -252,11 +252,17 @@ server <- function(input, output, session) {
     exampleFile <- system.file('TernaryApp', 'example.csv', package = 'Ternary')
     if (is.null(fileInput)) {
       if (exampleFile == "") {
-        output$dataStatus <- renderText(
-          "Data / example files not found; attempting to download.")
         ghFile <- "https://raw.githubusercontent.com/ms609/TernaryApp/master/example.csv"
-        candidate <- tryCatch({read.csv(ghFile); ghFile},
-                              warning = function (e) "")
+        candidate <- tryCatch({
+          read.csv(ghFile)
+          output$dataStatus <- renderText(
+            "Data / example files not found; loaded from GitHub.")
+          ghFile
+          }, warning = function (e) {
+            output$dataStatus <- renderText(
+              "Data / example files not found; could not load from GitHub.")
+            ""
+          })
       } else {
         output$dataStatus <- renderText(paste(
           "Data file not found; using example from", exampleFile))
