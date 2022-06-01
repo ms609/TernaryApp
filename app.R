@@ -42,38 +42,38 @@ palettes <- list("#91aaa7",
 )
 
 ltyInput <- function (id, name, val, none = TRUE) {
-  selectInput(id, paste(name, 'line type'),
-              c(if (none) list('None' = 'blank'),
-              list('Solid' = 'solid', 'Dotted' = 'dotted',
-                   'Dashed' = 'dashed', 'Dot-Dash' = 'dotdash',
-                   'Long-dash' = 'longdash', 'Two-dash' = 'twodash')),
+  selectInput(id, paste(name, "line type"),
+              c(if (none) list("None" = "blank"),
+              list("Solid" = "solid", "Dotted" = "dotted",
+                   "Dashed" = "dashed", "Dot-Dash" = "dotdash",
+                   "Long-dash" = "longdash", "Two-dash" = "twodash")),
               val)
 }
 pchInput <- function (id, name, val) {
   selectInput(id, name, 
               list(
-                'Data column 4' = 904,
-                'Data column 5' = 905,
-                'Data column 6' = 906,
-                'Square' = 0,
-                'Circle' = 1,
-                'Triangle-up' = 2,
-                'Plus' = 3,
-                'Cross' = 4,
-                'Diamond' = 5,
-                'Triangle-down' = 6,
-                'Crossed-square' = 7,
-                'Star' = 8,
-                'Plussed-diamond' = 9,
-                'Plussed-circle' = 10,
-                'Snowflake' = 11,
-                'Plussed-square' = 12,
-                'Crossed-circle' = 13,
-                'Triangle-in-square' = 14,
-                'Filled square' = 15,
-                'Filled circle' = 16,
-                'Filled triangle' = 17,
-                'Filled diamond' = 18
+                "Data column 4" = 904,
+                "Data column 5" = 905,
+                "Data column 6" = 906,
+                "Square" = 0,
+                "Circle" = 1,
+                "Triangle-up" = 2,
+                "Plus" = 3,
+                "Cross" = 4,
+                "Diamond" = 5,
+                "Triangle-down" = 6,
+                "Crossed-square" = 7,
+                "Star" = 8,
+                "Plussed-diamond" = 9,
+                "Plussed-circle" = 10,
+                "Snowflake" = 11,
+                "Plussed-square" = 12,
+                "Crossed-circle" = 13,
+                "Triangle-in-square" = 14,
+                "Filled square" = 15,
+                "Filled circle" = 16,
+                "Filled triangle" = 17,
+                "Filled diamond" = 18
                 ),
               val)
 }
@@ -81,11 +81,11 @@ cexInput <- function (id, name, val) {
   sliderInput(id, name, 0, 4, val, step = 0.01)
 }
 lwdInput <- function (id, name, val) {
-  sliderInput(id, paste(name, 'line width'), 0, 6, val, step = 0.01)
+  sliderInput(id, paste(name, "line width"), 0, 6, val, step = 0.01)
 }
 fontInput <- function (id, name, val) {
-  selectInput(id, paste0(name, ' font style'),
-              list('Plain' = 1, 'Bold' = 2, 'Italic' = 3, 'Bold-italic' = 4),
+  selectInput(id, paste0(name, " font style"),
+              list("Plain" = 1, "Bold" = 2, "Italic" = 3, "Bold-italic" = 4),
               val)
 }
 
