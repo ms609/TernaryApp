@@ -135,7 +135,7 @@ ui <- fluidPage(title = "Ternary plotter", theme = "Ternary.css",
            
           #xlim = NULL,
           #ylim = NULL,
-          
+
           #atip.rotate = NULL,
           #btip.rotate = NULL,
           #ctip.rotate = NULL,
