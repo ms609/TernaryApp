@@ -1,7 +1,6 @@
-library("shiny")
-if (!requireNamespace("shinyjs", quietly = TRUE,
-                      exclude = c("colourInput", "updateColourInput",
-                                  "colourPicker", "runExample"))) {
+library("methods", exclude = c("removeClass", "show"))
+library("shiny", quietly = TRUE)
+if (!requireNamespace("shinyjs", quietly = TRUE)) {
   install.packages("shinyjs")
   install.packages("colourpicker") # Necessarily absent, as imports shinyjs
 }
@@ -11,7 +10,7 @@ library("shinyjs", exclude = c("colourInput", "colourPicker",
 if (!requireNamespace("colourpicker", quietly = TRUE)) {
   install.packages("colourpicker")
 }
-library("colourpicker")
+library("colourpicker", exclude = c("runExample"))
 
 if (!requireNamespace("Ternary", quietly = TRUE)) {
   install.packages("Ternary")

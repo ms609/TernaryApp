@@ -1,0 +1,89 @@
+{
+  "input": {
+    "axis.cex": 0.96,
+    "axis.col": "#F51B1B",
+    "axis.font": "2",
+    "axis.lty": "dotted",
+    "axis.lwd": 2.03,
+    "col": "#E3B6B6",
+    "datafile": null,
+    "dim1": "Qz",
+    "dim2": "Fsp",
+    "dim3": "RF",
+    "display": [
+      "show.tip.labels",
+      "show.axis.labels",
+      "axis.labels",
+      "axis.tick"
+    ],
+    "grid.col": "#245DA6",
+    "grid.lines": 7,
+    "grid.lty": "dotted",
+    "grid.lwd": 2.54,
+    "grid.minor.col": "#19779C",
+    "grid.minor.lines": 3,
+    "grid.minor.lty": "dotdash",
+    "grid.minor.lwd": 1.25,
+    "lab.cex": 1,
+    "lab.col": "#000000",
+    "lab.font": "2",
+    "lab.offset": 0.215,
+    "pngSize": 850,
+    "point": "right",
+    "points.cex": 2.27,
+    "points.col": "#E01919",
+    "points.col.by": "0",
+    "points.lty": "longdash",
+    "points.lwd": 1.65,
+    "points.pch": "11",
+    "points.type": "b",
+    "text.source": "0",
+    "ticks.col": "#30948D",
+    "ticks.length": 0.033,
+    "ticks.lwd": 2.71,
+    "tip.cex": 1.14,
+    "tip.col": "#000000",
+    "tip.font": "4"
+  },
+  "output": {
+    "dataStatus": "Data file not found; using example from C:/Users/pjjg18/AppData/Local/R/win-library/4.3/Ternary/TernaryApp/example.csv",
+    "plot": {
+      "src": "[image data sha1: b929916ea694b45637817bb1bd42ba1d15037ff7]",
+      "width": 661,
+      "height": 400,
+      "alt": "Plot object",
+      "coordmap": {
+        "panels": [
+          {
+            "domain": {
+              "left": -0.193387298107781,
+              "right": 1.05941270189222,
+              "bottom": -0.6264,
+              "top": 0.6264
+            },
+            "range": {
+              "left": 0,
+              "right": 661,
+              "bottom": 399,
+              "top": -0.999999999999956
+            },
+            "log": {
+              "x": null,
+              "y": null
+            },
+            "mapping": {
+
+            }
+          }
+        ],
+        "dims": {
+          "width": 661,
+          "height": 400
+        }
+      }
+    }
+  },
+  "export": {
+
+  }
+}
